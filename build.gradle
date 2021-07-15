@@ -1,0 +1,37 @@
+plugins {
+    id 'application'
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+
+group = 'com.basketbandit'
+project.version = '21w28a'
+sourceCompatibility = 1.8
+mainClassName = 'com.basketbandit.MusicParty'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven { url = 'https://jitpack.io' }
+}
+
+ext {
+    snakeYaml   = '1.28'          // https://mvnrepository.com/artifact/org.yaml/snakeyaml
+    slf4jApi    = '2.0.0-alpha1'  // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
+}
+
+dependencies {
+    implementation group: 'org.yaml', name: 'snakeyaml', version: snakeYaml
+    implementation group: 'org.slf4j', name: 'slf4j-simple', version: slf4jApi
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+}
+
+test {
+    useJUnitPlatform()
+}
