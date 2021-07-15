@@ -77,6 +77,7 @@ public class SocketServer extends Thread {
                     if(!greeted) {
                         if(inputLine.equals(passcode)) {
                             greeted = true;
+                            out.println(inputLine);
                             continue;
                         }
                         socketClients.remove(socketClients.stream().filter(client -> client.clientNickname.equals(clientNickname)).findFirst().get());
