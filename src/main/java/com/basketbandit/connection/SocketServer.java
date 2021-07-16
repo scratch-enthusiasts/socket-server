@@ -12,7 +12,7 @@ import java.util.*;
 
 public class SocketServer extends Thread {
     private static final Logger log = LoggerFactory.getLogger(SocketServer.class);
-    private final List<SocketClient> socketClients = Collections.synchronizedList(new ArrayList<>());
+    private final List<SocketClient> clients = Collections.synchronizedList(new ArrayList<>());
     private ServerSocket socket;
     private final int port;
     private String passcode;
@@ -54,11 +54,23 @@ public class SocketServer extends Thread {
         return passcode.toString();
     }
 
+    /**
+     * Broadcasts a message to each client - this would most commonly be something like a track update
+     * @param message {@link String}
+     */
+    public void broadcast(String message) {
+        clients.stream()
+                .filter(client -> client.in != null && client.out != null)
+                .forEach(client -> client.out.println(message));
+    }
+
     private class SocketClient extends Thread {
         private final Socket client;
         private final String clientAddress;
         private String clientNickname;
         private boolean greeted = false;
+        private BufferedReader in;
+        private PrintWriter out;
 
         public SocketClient(Socket socket) {
             this.client = socket;
@@ -67,8 +79,8 @@ public class SocketServer extends Thread {
 
         public void run() {
             try {
-                PrintWriter out = new PrintWriter(new OutputStreamWriter(client.getOutputStream(), StandardCharsets.UTF_8), true);
-                BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream(), StandardCharsets.UTF_8));
+                in = new BufferedReader(new InputStreamReader(client.getInputStream(), StandardCharsets.UTF_8));
+                out = new PrintWriter(new OutputStreamWriter(client.getOutputStream(), StandardCharsets.UTF_8), true);
                 log.info("Client connected from address '" + clientAddress + "'");
 
                 String inputLine;
@@ -80,7 +92,7 @@ public class SocketServer extends Thread {
                             out.println(inputLine);
                             continue;
                         }
-                        socketClients.remove(socketClients.stream().filter(client -> client.clientNickname.equals(clientNickname)).findFirst().get());
+                        clients.remove(clients.stream().filter(client -> client.clientNickname.equals(clientNickname)).findFirst().get());
                         log.warn("Client from address '{}' was disconnected - incorrect passcode.", clientAddress);
                         out.println("INCORRECT_PASSCODE");
                         break;
@@ -89,9 +101,9 @@ public class SocketServer extends Thread {
                     // Client socket identification signal
                     if(inputLine.startsWith("@")) {
                         final String input = inputLine.substring(1, Math.min(inputLine.length(), 32));
-                        if(socketClients.stream().noneMatch(socketClient -> socketClient.clientNickname.equals(input))) {
+                        if(clients.stream().noneMatch(socketClient -> socketClient.clientNickname.equals(input))) {
                             log.info("Client from address '{}' identified as '{}'", clientAddress, (clientNickname = input));
-                            socketClients.add(this);
+                            clients.add(this);
                             out.println(inputLine);
                             continue;
                         }
@@ -102,7 +114,7 @@ public class SocketServer extends Thread {
 
                     // Client socket shutdown signal
                     if(inputLine.equals(".")) {
-                        socketClients.remove(socketClients.stream().filter(client -> client.clientAddress.equals(clientAddress)).findFirst().get());
+                        clients.remove(clients.stream().filter(client -> client.clientAddress.equals(clientAddress)).findFirst().get());
                         log.info(clientNickname + " disconnected!");
                         out.println("GOODBYE");
                         break;
@@ -115,7 +127,7 @@ public class SocketServer extends Thread {
             } catch(Exception e) {
                 log.warn("There was a problem with client from address '{}', message: {}", clientAddress, e.getMessage());
                 if(e.getMessage().equals("Connection reset")) {
-                    if(socketClients.remove(this)) {
+                    if(clients.remove(this)) {
                         log.info("Client from address '{}' was successfully disconnected", clientAddress);
                         return;
                     }
