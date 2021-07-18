@@ -1,0 +1,8 @@
+.git
+.idea
+Dockerfile
+.DS_Store
+.gitignore
+README.md
+*.csv
+/tmp/*
