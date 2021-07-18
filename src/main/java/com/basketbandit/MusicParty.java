@@ -16,16 +16,20 @@ import java.util.Scanner;
 public class MusicParty {
     private static final Logger log = LoggerFactory.getLogger(MusicParty.class);
     private DatabaseServer databaseServer;
+    private static boolean databaseEnabled = false;
     private SocketServer socketServer;
 
     public static void main(String[] args) {
+        databaseEnabled = args.length > 0;
         new MusicParty();
     }
 
     public MusicParty() {
         try {
-            this.databaseServer = new DatabaseServer(3306);
-            this.databaseServer.start();
+            if(databaseEnabled) {
+                this.databaseServer = new DatabaseServer(3306);
+                this.databaseServer.start();
+            }
         } catch(ManagedProcessException e) {
             log.error("There was an error starting the database, message: {}", e.getMessage(), e);
         }
