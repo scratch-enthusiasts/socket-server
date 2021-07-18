@@ -9,7 +9,7 @@ RUN apk update && \
     apk add unzip
 
 # download jar from github
-RUN wget https://github.com/scratch-enthusiasts/socket-server/blob/main/out/artifacts/musicparty/MusicParty.jar?raw=true
+RUN wget https://github.com/scratch-enthusiasts/socket-server/raw/main/out/artifacts/musicparty/MusicParty.jar
 
 # expose ports for various reasons such as database access
 EXPOSE 5002
