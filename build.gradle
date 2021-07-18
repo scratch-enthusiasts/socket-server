@@ -7,7 +7,7 @@ apply plugin: 'idea'
 
 group = 'com.basketbandit'
 project.version = '21w28a'
-sourceCompatibility = 1.8
+sourceCompatibility = 1.16
 mainClassName = 'com.basketbandit.MusicParty'
 
 tasks.withType(JavaCompile) {
@@ -21,12 +21,18 @@ repositories {
 }
 
 ext {
-    snakeYaml   = '1.28'          // https://mvnrepository.com/artifact/org.yaml/snakeyaml
-    slf4jApi    = '2.0.0-alpha1'  // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
+    snakeYaml            = '1.28'             // https://mvnrepository.com/artifact/org.yaml/snakeyaml
+    mariaDb              = 'mariaDB4j-2.4.0'  // https://jitpack.io/#vorburger/MariaDB4j
+    mysqlConnectorJava   = '8.0.25'           // https://mvnrepository.com/artifact/mysql/mysql-connector-java
+    hikaricp             = '4.0.3'            // https://mvnrepository.com/artifact/com.zaxxer/HikariCP
+    slf4jApi             = '2.0.0-alpha1'     // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
 }
 
 dependencies {
     implementation group: 'org.yaml', name: 'snakeyaml', version: snakeYaml
+    implementation group: 'com.github.vorburger.MariaDB4j', name: 'mariaDB4j', version: mariaDb
+    implementation group: 'mysql', name: 'mysql-connector-java', version: mysqlConnectorJava
+    implementation group: 'com.zaxxer', name: 'HikariCP', version: hikaricp
     implementation group: 'org.slf4j', name: 'slf4j-simple', version: slf4jApi
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'

@@ -1,5 +1,7 @@
 package com.basketbandit;
 
+import ch.vorburger.exec.ManagedProcessException;
+import com.basketbandit.connection.DatabaseServer;
 import com.basketbandit.connection.SocketServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +15,7 @@ import java.util.Scanner;
 
 public class MusicParty {
     private static final Logger log = LoggerFactory.getLogger(MusicParty.class);
+    private DatabaseServer databaseServer;
     private SocketServer socketServer;
 
     public static void main(String[] args) {
@@ -20,6 +23,13 @@ public class MusicParty {
     }
 
     public MusicParty() {
+        try {
+            this.databaseServer = new DatabaseServer(3306);
+            this.databaseServer.start();
+        } catch(ManagedProcessException e) {
+            log.error("There was an error starting the database, message: {}", e.getMessage(), e);
+        }
+
         try(InputStream inputStream = new FileInputStream("./config.yaml")) {
             Map<String, Object> config = new Yaml().load(inputStream);
 
@@ -40,6 +50,9 @@ public class MusicParty {
     }
 
     public void shutdown() {
+        if(databaseServer != null) {
+            databaseServer.shutdown();
+        }
         if(socketServer != null) {
             socketServer.shutdown();
         }
